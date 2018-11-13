@@ -36,7 +36,7 @@ public class GreenDaoUtil {
 
     public void init(Context context) {
 
-        mHelper = new DaoMaster.DevOpenHelper(context, "test-db", null);
+        mHelper = new DaoMaster.DevOpenHelper(context, "app-db", null);
         db = mHelper.getWritableDatabase();
         // 注意：该数据库连接属于 DaoMaster，所以多个 Session 指的是相同的数据库连接。
         mDaoMaster = new DaoMaster(db);
@@ -53,17 +53,18 @@ public class GreenDaoUtil {
         return db;
     }
 
-    public final void insertData(TestBean bean){
-        mDaoSession.getTestBeanDao().insert(bean);
+    public final void insertData(AppBean bean){
+        bean.isInDeleteMode = false;
+        mDaoSession.getAppBeanDao().insertOrReplace(bean);
 
     }
 
-    public final void deleteData(Long id){
-        mDaoSession.getTestBeanDao().deleteByKey(id);
+    public final void deleteData(String id){
+        mDaoSession.getAppBeanDao().deleteByKey(id);
     }
 
-    public final List<TestBean>getAll(){
-        return mDaoSession.getTestBeanDao().loadAll();
+    public final List<AppBean>getAll(){
+        return mDaoSession.getAppBeanDao().loadAll();
     }
 
 }

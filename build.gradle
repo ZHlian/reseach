@@ -12,6 +12,9 @@ buildscript {
         // in the individual module build.gradle files
     }
 
+    repositories {
+        google()
+    }
 }
 
 allprojects {
@@ -37,4 +40,8 @@ allprojects {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+repositories {
+    google()
 }
