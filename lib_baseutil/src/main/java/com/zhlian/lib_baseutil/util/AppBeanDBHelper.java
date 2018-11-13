@@ -1,6 +1,6 @@
-package com.changan.lib_baseutil.util;
+package com.zhlian.lib_baseutil.util;
 
-import com.changan.lib_baseutil.AppBean;
+import com.zhlian.lib_baseutil.AppBean;
 
 import java.util.ArrayList;
 import java.util.List;

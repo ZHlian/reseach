@@ -1,4 +1,4 @@
-package com.changan.lib_baseutil.adapter;
+package com.zhlian.lib_baseutil.adapter;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -8,9 +8,9 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.changan.lib_baseutil.AppBean;
-import com.changan.lib_baseutil.R;
-import com.changan.lib_baseutil.util.FormatTools;
+import com.zhlian.lib_baseutil.AppBean;
+import com.zhlian.lib_baseutil.R;
+import com.zhlian.lib_baseutil.util.FormatTools;
 
 import java.util.ArrayList;
 import java.util.List;

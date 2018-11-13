@@ -6,13 +6,13 @@ android {
     compileSdkVersion 26
     greendao {
         schemaVersion 1  //版本
-        daoPackage 'com.changan.lib_baseutil.greendao' // 一般为app包名+生成文件的文件夹名
+        daoPackage 'com.zhlian.lib_baseutil.greendao' // 一般为app包名+生成文件的文件夹名
         targetGenDir 'src/main/java' //生成文件路径
     }
 
 
     defaultConfig {
-        applicationId "com.changan.lib_baseutil"
+        applicationId "com.zhlian.lib_baseutil"
         minSdkVersion 18
         targetSdkVersion 26
         versionCode 1

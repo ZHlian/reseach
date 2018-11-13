@@ -1,4 +1,4 @@
-package com.changan.lib_baseutil;
+package com.zhlian.lib_baseutil;
 
 /**
  * Created by 64553 on 2018-11-12.

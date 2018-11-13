@@ -1,4 +1,4 @@
-package com.changan.lib_baseutil;
+package com.zhlian.lib_baseutil;
 
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -16,12 +16,12 @@ import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.changan.lib_baseutil.adapter.AppSelectAdapter;
-import com.changan.lib_baseutil.adapter.AppShowAdapter;
-import com.changan.lib_baseutil.adapter.AppShowAdapter.OnItemClickListener;
-import com.changan.lib_baseutil.util.FormatTools;
-import com.changan.lib_baseutil.util.ThirdAppLoader;
-import com.changan.lib_baseutil.util.ThirdAppUtil;
+import com.zhlian.lib_baseutil.adapter.AppSelectAdapter;
+import com.zhlian.lib_baseutil.adapter.AppShowAdapter;
+import com.zhlian.lib_baseutil.adapter.AppShowAdapter.OnItemClickListener;
+import com.zhlian.lib_baseutil.util.FormatTools;
+import com.zhlian.lib_baseutil.util.ThirdAppLoader;
+import com.zhlian.lib_baseutil.util.ThirdAppUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;

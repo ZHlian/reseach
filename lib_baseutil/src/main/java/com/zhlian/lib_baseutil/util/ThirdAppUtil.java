@@ -1,9 +1,9 @@
-package com.changan.lib_baseutil.util;
+package com.zhlian.lib_baseutil.util;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
 
-import com.changan.lib_baseutil.AppBean;
+import com.zhlian.lib_baseutil.AppBean;
 
 import java.util.List;
 

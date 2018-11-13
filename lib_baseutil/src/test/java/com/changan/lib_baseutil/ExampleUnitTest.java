@@ -1,4 +1,4 @@
-package com.changan.lib_baseutil;
+package com.zhlian.lib_baseutil;
 
 import org.junit.Test;
 

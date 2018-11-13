@@ -1,10 +1,10 @@
-package com.changan.lib_baseutil;
+package com.zhlian.lib_baseutil;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.changan.lib_baseutil.greendao.DaoMaster;
-import com.changan.lib_baseutil.greendao.DaoSession;
+import com.zhlian.lib_baseutil.greendao.DaoMaster;
+import com.zhlian.lib_baseutil.greendao.DaoSession;
 
 import java.util.List;
 

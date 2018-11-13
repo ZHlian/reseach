@@ -1,4 +1,4 @@
-package com.changan.lib_baseutil.util;
+package com.zhlian.lib_baseutil.util;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

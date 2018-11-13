@@ -1,4 +1,4 @@
-package com.changan.lib_baseutil.util;
+package com.zhlian.lib_baseutil.util;
 
 import android.content.Context;
 import android.content.Intent;
@@ -6,7 +6,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.widget.Toast;
 
-import com.changan.lib_baseutil.MainActivity;
+import com.zhlian.lib_baseutil.MainActivity;
 
 /**
  * Created by 64553 on 2018-11-13.
