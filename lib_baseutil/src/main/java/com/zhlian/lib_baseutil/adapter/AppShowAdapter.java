@@ -97,21 +97,21 @@ public class AppShowAdapter extends RecyclerView.Adapter<AppShowAdapter.ViewHold
     @Override
     public void onClick(View v) {
         if (null != onItemClickListener) {
-            switch (v.getId()) {
-                case R.id.root_view:
-                    if (isInDeleteMode) {
-                        changeSelectMode(false);
-                        Log.e("haha", "switch delete mode false");
-                    } else {
-                        //
-                        onItemClickListener.onClick((int) v.getTag());
-                        Log.e("haha", "dispach touch----");
-                    }
-                    break;
-                case R.id.app_delte:
-                    Log.e("haha", "app_delte click--");
-                    onItemClickListener.onDeleteClick((int) v.getTag());
-                    break;
+            int i = v.getId();
+            if (i == R.id.root_view) {
+                if (isInDeleteMode) {
+                    changeSelectMode(false);
+                    Log.e("haha", "switch delete mode false");
+                } else {
+                    //
+                    onItemClickListener.onClick((int) v.getTag());
+                    Log.e("haha", "dispach touch----");
+                }
+
+            } else if (i == R.id.app_delte) {
+                Log.e("haha", "app_delte click--");
+                onItemClickListener.onDeleteClick((int) v.getTag());
+
             }
         }
 

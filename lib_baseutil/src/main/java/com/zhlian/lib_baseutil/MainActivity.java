@@ -9,25 +9,22 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.alibaba.android.arouter.facade.annotation.Route;
 import com.zhlian.lib_baseutil.adapter.AppSelectAdapter;
 import com.zhlian.lib_baseutil.adapter.AppShowAdapter;
 import com.zhlian.lib_baseutil.adapter.AppShowAdapter.OnItemClickListener;
 import com.zhlian.lib_baseutil.util.FormatTools;
-import com.zhlian.lib_baseutil.util.ThirdAppLoader;
 import com.zhlian.lib_baseutil.util.ThirdAppUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
 
+@Route(path = "/lib_baseutil/MainActivity")
 public class MainActivity extends AppCompatActivity implements OnItemClickListener, AppSelectAdapter.ItemSelectedListener {
     private static final String TAG = MainActivity.class.getSimpleName();
     private RecyclerView mRecyvlerView;
@@ -101,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_other_main);
 
         addAppBean = new AppBean();
         addAppBean.icon = FormatTools.getInstance().Bitmap2Bytes(BitmapFactory.decodeResource(getResources(), R.drawable.icon_add));

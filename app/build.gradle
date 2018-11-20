@@ -79,5 +79,6 @@ dependencies {
     if (!isModule.toBoolean()) {
         implementation project(':module_xfvoice')
         implementation project(':module_bdvoice')
+        implementation project(':lib_baseutil')
     }
 }

@@ -13,7 +13,6 @@ public class App extends Application{
     @Override
     public void onCreate() {
         super.onCreate();
-        ThirdAppUtil.getInstance().init(this);
-        GreenDaoUtil.getInstance().init(this);
+
     }
 }

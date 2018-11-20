@@ -2,8 +2,10 @@ package com.zhlian.lib_common.base;
 
 import android.app.Application;
 
-import com.orhanobut.logger.LogLevel;
+
+import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.Logger;
+import com.zhlian.lib_common.BuildConfig;
 import com.zhlian.lib_common.utils.Utils;
 
 import java.util.List;
@@ -35,7 +37,11 @@ public class BaseApplication extends Application {
     public void onCreate() {
         super.onCreate();
         sInstance = this;
-        Logger.init("pattern").logLevel(LogLevel.FULL);
+        Logger.addLogAdapter(new AndroidLogAdapter() {
+            @Override public boolean isLoggable(int priority, String tag) {
+                return BuildConfig.DEBUG;
+            }
+        });
         Utils.init(this);
         mAppDelegateList = ClassUtils.getObjectsWithInterface(this, IApplicationDelegate.class, ROOT_PACKAGE);
         for (IApplicationDelegate delegate : mAppDelegateList) {

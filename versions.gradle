@@ -28,7 +28,7 @@ versions.utils = "1.10.0"
 versions.top_snackbar = "1.1.1"
 versions.litepal = "1.6.1"
 versions.toasty = "1.1.3"
-versions.logger = "1.15"
+versions.logger = "2.2.0"
 versions.material_dialog = "0.9.6.0"
 //Arouter
 versions.arouter_compiler = "1.1.4"
