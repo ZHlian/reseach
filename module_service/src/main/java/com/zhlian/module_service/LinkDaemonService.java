@@ -46,6 +46,7 @@ public class LinkDaemonService extends Service{
     private void startServiceAuto(){
         Log.e(TAG.NAME,"startServiceAuto");
 
+
         Intent autoBroadcast = new Intent("com.tech.auto");
         PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(),0,autoBroadcast,0);
         AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
