@@ -12,6 +12,9 @@ import com.zhlian.module_bdvoice.util.tts.TTSManager;
 import com.zhlian.module_bdvoice.util.tts.control.InitConfig;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -107,7 +110,21 @@ public class BDVoiceContractPresenterImpl implements BDVoiceContract.Presenter{
 
         @Override
         public void onAsrOnlineNluResult(String nluResult) {
-            Logger.d(TAG,"onAsrOnlineNluResult");
+            Logger.d(TAG,"onAsrOnlineNluResult"+nluResult);
+
+            JSONObject jsonObject = null;
+            try {
+                jsonObject = new JSONObject(nluResult);
+                jsonObject = jsonObject.getJSONObject("merged_res");
+                jsonObject = jsonObject.getJSONObject("semantic_form");
+                JSONArray array = jsonObject.getJSONArray("results");
+                jsonObject = array.getJSONObject(0);
+                String domain = jsonObject.getString("domain");
+                String intent = jsonObject.getString("intent");
+                Logger.d(TAG,"domain is :"+domain+"intent is :"+intent);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
         }
 

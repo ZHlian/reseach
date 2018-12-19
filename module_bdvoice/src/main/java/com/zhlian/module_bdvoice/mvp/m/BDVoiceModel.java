@@ -3,6 +3,7 @@ package com.zhlian.module_bdvoice.mvp.m;
 import android.content.Context;
 import android.widget.TextView;
 
+import com.baidu.speech.asr.SpeechConstant;
 import com.baidu.tts.client.SpeechSynthesizer;
 import com.baidu.tts.client.TtsMode;
 import com.zhlian.module_bdvoice.mvp.base.BaseModel;
@@ -36,7 +37,13 @@ public class BDVoiceModel extends BaseModel implements BDVoiceModelFeature {
 
     @Override
     public void startRecognize() {
-        mRecognizer.start(new HashMap<>());
+        mRecognizer.start(getRecogParam());
+    }
+
+    private HashMap<String,Object>getRecogParam(){
+        HashMap<String,Object>result = new HashMap<>();
+        result.put(SpeechConstant.PID,"15361");
+        return result;
     }
 
     @Override
