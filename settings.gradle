@@ -1,1 +1,1 @@
-include ':app', ':lib_common', ':module_bdvoice', ':module_xfvoice', ':lib_baseutil', ':module_launcher', ':module_network', ':module_service', ':module_autoscroll'
+include ':app', ':lib_common', ':module_bdvoice', ':module_xfvoice', ':lib_baseutil', ':module_launcher', ':module_network', ':module_service', ':module_autoscroll', ':module_glsurface', ':module_eventbus'
