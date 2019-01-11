@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Point;
@@ -25,10 +27,12 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -38,10 +42,21 @@ import android.util.SparseIntArray;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.orhanobut.logger.Logger;
+import com.zhlian.module_glsurface.util.Base64Util;
+import com.zhlian.module_glsurface.util.FileUtil;
+import com.zhlian.module_glsurface.util.PictureCompressUtil;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -54,6 +69,8 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import network.NetWorkManager;
+import network.retro.FaceRecorgResult;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -75,20 +92,29 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     final CameraDevice.StateCallback mCameraStateCallBack = new CameraDevice.StateCallback() {
         @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
         @Override
-        public void onOpened(@NonNull CameraDevice camera) {
-            Logger.e("onOpened"+camera.getId());
-
+        public void onOpened(@NonNull CameraDevice cameraDevice) {
+            // This method is called when the camera is opened.  We start camera preview here.
+            mCameraOpenCloseLock.release();
+            mCameraDevice = cameraDevice;
+            createCameraPreviewSession();
         }
 
         @Override
-        public void onDisconnected(@NonNull CameraDevice camera) {
-            Logger.e("onDisconnected"+camera.getId());
-
+        public void onDisconnected(@NonNull CameraDevice cameraDevice) {
+            mCameraOpenCloseLock.release();
+            cameraDevice.close();
+            mCameraDevice = null;
         }
 
         @Override
-        public void onError(@NonNull CameraDevice camera, int error) {
-            Logger.e("onError");
+        public void onError(@NonNull CameraDevice cameraDevice, int error) {
+            mCameraOpenCloseLock.release();
+            cameraDevice.close();
+            mCameraDevice = null;
+            Activity activity = MainActivity.this;
+            if (null != activity) {
+                activity.finish();
+            }
         }
     };
     private static final int MAX_PREVIEW_WIDTH = 1920;
@@ -111,6 +137,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     private final ImageReader.OnImageAvailableListener onImageAvailableListener = new ImageReader.OnImageAvailableListener() {
         @Override
         public void onImageAvailable(ImageReader reader) {
+            mBackgroundHandler.post(new ImageSaver(reader.acquireNextImage(), mFile));
 
         }
     };
@@ -169,6 +196,8 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     private int mState = STATE_PREVIEW;
     private Semaphore mCameraOpenCloseLock = new Semaphore(1);
     private boolean mFlashSupported;
+    private EditText editText;
+    boolean isPictureTake = true;
 
     private CameraCaptureSession.CaptureCallback mCaptureCallback
             = new CameraCaptureSession.CaptureCallback() {
@@ -193,6 +222,13 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                             captureStillPicture();
                         } else {
                             runPrecaptureSequence();
+                        }
+                    }else {
+                        Log.e(TAG,"aftate is :"+afState.intValue());
+                        captureStillPicture();
+
+                        if (!isPictureTake){
+                            captureStillPicture();
                         }
                     }
                     break;
@@ -234,62 +270,81 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         }
 
     };
+//
+//    private final CameraDevice.StateCallback mStateCallback = new CameraDevice.StateCallback() {
+//
+//        @Override
+//        public void onOpened(@NonNull CameraDevice cameraDevice) {
+//            // This method is called when the camera is opened.  We start camera preview here.
+//            mCameraOpenCloseLock.release();
+//            mCameraDevice = cameraDevice;
+//            createCameraPreviewSession();
+//        }
+//
+//        @Override
+//        public void onDisconnected(@NonNull CameraDevice cameraDevice) {
+//            mCameraOpenCloseLock.release();
+//            cameraDevice.close();
+//            mCameraDevice = null;
+//        }
+//
+//        @Override
+//        public void onError(@NonNull CameraDevice cameraDevice, int error) {
+//            mCameraOpenCloseLock.release();
+//            cameraDevice.close();
+//            mCameraDevice = null;
+//            Activity activity = MainActivity.this;
+//            if (null != activity) {
+//                activity.finish();
+//            }
+//        }
+//
+//    };
 
-    private final CameraDevice.StateCallback mStateCallback = new CameraDevice.StateCallback() {
 
-        @Override
-        public void onOpened(@NonNull CameraDevice cameraDevice) {
-            // This method is called when the camera is opened.  We start camera preview here.
-            mCameraOpenCloseLock.release();
-            mCameraDevice = cameraDevice;
-            createCameraPreviewSession();
-        }
-
-        @Override
-        public void onDisconnected(@NonNull CameraDevice cameraDevice) {
-            mCameraOpenCloseLock.release();
-            cameraDevice.close();
-            mCameraDevice = null;
-        }
-
-        @Override
-        public void onError(@NonNull CameraDevice cameraDevice, int error) {
-            mCameraOpenCloseLock.release();
-            cameraDevice.close();
-            mCameraDevice = null;
-            Activity activity = MainActivity.this;
-            if (null != activity) {
-                activity.finish();
-            }
-        }
-
-    };
-
-
-    private static final String []PERMISSIONS = {Manifest.permission.CAMERA
+    private static final String []PERMISSIONS = {
+            Manifest.permission.CAMERA
             ,Manifest.permission.READ_EXTERNAL_STORAGE
-            ,Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            ,Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ,Manifest.permission.INTERNET};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mTextureView = findViewById(R.id.texture_view);
+        editText = findViewById(R.id.face_result_info);
         findViewById(R.id.btn_take_photo).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Logger.e("take a photo");
+                isPictureTake = false;
                 takePicture();
             }
         });
-
+//        if (ActivityCompat.C(this,PERMISSIONS)){
+//
+//        }
         EasyPermissions.requestPermissions(this,"hhhh",123,PERMISSIONS);
+        mFile = new File(getExternalFilesDir(null), "pic.jpg");
 
+        EventBus.getDefault().register(this);
+//        NetWorkManager.getInstance().addTokenRequest();
+
+
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onFaceResult(FaceRecorgResult recorgResult){
+        Logger.e("rev"+recorgResult);
+        editText.setText(new Gson().toJson(recorgResult));
     }
 
     @Override
     protected void onStop() {
         super.onStop();
     }
+
+
 
     @Override
     protected void onResume() {
@@ -311,6 +366,12 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
+
     private void setUpCameraOutputs(int width, int height) {
         Activity activity = this;
         CameraManager manager = (CameraManager) activity.getSystemService(Context.CAMERA_SERVICE);
@@ -321,7 +382,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
                 // We don't use a front facing camera in this sample.
                 Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
-                if (facing != null && facing == CameraCharacteristics.LENS_FACING_FRONT) {
+                if (facing != null && facing == CameraCharacteristics.LENS_FACING_BACK) {
                     continue;
                 }
 
@@ -486,6 +547,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             throw new RuntimeException("Interrupted while trying to lock camera opening.", e);
         }
     }
+
     private void closeCamera() {
         try {
             mCameraOpenCloseLock.acquire();
@@ -508,7 +570,6 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         }
     }
 
-
     private void startAsyncHandler(){
         Logger.e("startAsyncHandler");
         mBackgroundThread = new HandlerThread("carmera");
@@ -527,7 +588,6 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         }
     }
 
-
     private void createCameraPreviewSession(){
         SurfaceTexture surfaceTexture = mTextureView.getSurfaceTexture();
         assert surfaceTexture != null;
@@ -536,7 +596,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         Surface surface = new Surface(surfaceTexture);
 
         try {
-            mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+            mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_MANUAL);
             mPreviewRequestBuilder.addTarget(surface);
             mCameraDevice.createCaptureSession(Arrays.asList(surface, mImageReader.getSurface()), new CameraCaptureSession.StateCallback() {
                 @Override
@@ -567,7 +627,6 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             e.printStackTrace();
         }
     }
-
 
     private void setAutoFlash(CaptureRequest.Builder requestBuilder) {
         if (mFlashSupported) {
@@ -607,6 +666,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
     private void lockFocus(){
         mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
+//        mPreviewRequestBuilder.set(CaptureRequest.Contron);
         mState = STATE_WAITING_LOCK;
         try {
             mCameraCaptureSession.capture(mPreviewRequestBuilder.build(), mCaptureCallback,
@@ -616,22 +676,23 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         }
     }
 
-    private void runPreCaptureSequence(){
-
-        try {
-            // This is how to tell the camera to trigger.
-            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
-                    CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START);
-            // Tell #mCaptureCallback to wait for the precapture sequence to be set.
-            mState = STATE_WAITING_PRECAPTURE;
-            mCameraCaptureSession.capture(mPreviewRequestBuilder.build(), mCaptureCallback,
-                    mBackgroundHandler);
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
-        }
-    }
+//    private void runPreCaptureSequence(){
+//
+//        try {
+//            // This is how to tell the camera to trigger.
+//            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
+//                    CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START);
+//            // Tell #mCaptureCallback to wait for the precapture sequence to be set.
+//            mState = STATE_WAITING_PRECAPTURE;
+//            mCameraCaptureSession.capture(mPreviewRequestBuilder.build(), mCaptureCallback,
+//                    mBackgroundHandler);
+//        } catch (CameraAccessException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     private void captureStillPicture(){
+        isPictureTake = true;
         if (null==mCameraDevice){
             return;
         }
@@ -647,6 +708,23 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             // Orientation
             int rotation = getWindowManager().getDefaultDisplay().getRotation();
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, getOrientation(rotation));
+
+            CameraCaptureSession.CaptureCallback CaptureCallback
+                    = new CameraCaptureSession.CaptureCallback() {
+
+                @Override
+                public void onCaptureCompleted(@NonNull CameraCaptureSession session,
+                                               @NonNull CaptureRequest request,
+                                               @NonNull TotalCaptureResult result) {
+//                    showToast("Saved: " + mFile);
+                    Log.d(TAG, mFile.toString());
+                    unlockFocus();
+                }
+            };
+
+            mCameraCaptureSession.stopRepeating();
+            mCameraCaptureSession.abortCaptures();
+            mCameraCaptureSession.capture(captureBuilder.build(), CaptureCallback, null);
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
@@ -676,7 +754,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         }
     }
 
-    private static class ImageSaver implements Runnable {
+    private  class ImageSaver implements Runnable {
 
         /**
          * The JPEG image
@@ -699,8 +777,31 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             buffer.get(bytes);
             FileOutputStream output = null;
             try {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+
+                Bitmap smallBitmap = PictureCompressUtil.getZoomImage(bitmap,100);
+
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                smallBitmap.compress(Bitmap.CompressFormat.JPEG,100,byteArrayOutputStream);
+//                int options = 90;
+//                while (byteArrayOutputStream.toByteArray().length / 1024 > 400) { // 循环判断如果压缩后图片是否大于100kb,大于继续压缩
+//                    byteArrayOutputStream.reset(); // 重置baos即清空baos
+//                    bitmap.compress(Bitmap.CompressFormat.JPEG, options, byteArrayOutputStream);//
+//// 这里压缩options%，把压缩后的数据存放到baos中
+//                    if (options > 10) {//设置最小值，防止低于0时出异常
+//                        options -= 10;// 每次都减少10
+//                    }
+//                }
+//
+                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());//
+// 把压缩后的数据baos存放到ByteArrayInputStream中
+                Bitmap bitmap2 = BitmapFactory.decodeStream(byteArrayInputStream, null, null);//
                 output = new FileOutputStream(mFile);
-                output.write(bytes);
+                bitmap2.compress(Bitmap.CompressFormat.JPEG,100,output);
+                output.flush();
+//                output.write(bytes);
+                String bast = Base64Util.encode(byteArrayOutputStream.toByteArray());
+                NetWorkManager.getInstance().addRecorgRequest(bast);
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
@@ -715,6 +816,16 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             }
         }
 
+    }
+    public String getSDPath(){
+        File sdDir = null;
+        boolean sdCardExist = Environment.getExternalStorageState()
+                .equals(android.os.Environment.MEDIA_MOUNTED);//判断sd卡是否存在
+        if(sdCardExist)
+        {
+            sdDir = Environment.getExternalStorageDirectory();//获取跟目录
+        }
+        return sdDir.toString();
     }
 
     @Override

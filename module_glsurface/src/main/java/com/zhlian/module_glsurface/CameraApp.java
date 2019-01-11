@@ -10,6 +10,8 @@ import com.orhanobut.logger.FormatStrategy;
 import com.orhanobut.logger.Logger;
 import com.orhanobut.logger.PrettyFormatStrategy;
 
+import network.NetWorkManager;
+
 /**
  * Created by Hua on 2018-12-27.
  * Power By ZHLian
@@ -34,7 +36,7 @@ public class CameraApp extends Application {
             }
         });
         Logger.e("applicaion oncreate-----");
-
+        NetWorkManager.getInstance().init();
 
     }
 }
